@@ -1,5 +1,5 @@
 const apiUrl =
-	'https://script.google.com/macros/s/AKfycbxYQLmalCPXJ0BvCRU6Pl0ispnttIcs0vnfUTjdSOWbVtQXsVhKML9_P0dbDhZpC6fg/exec';
+	'https://script.google.com/macros/s/AKfycbwpVg2QHsZAc5ijnW-FrgPnQEEe_CrqKpDc9JfPdeoObN3WHU48YCGtyYN9HGZcO8nx/exec';
 
 async function SendRequest(method, data) {
 	const query = (data) =>
