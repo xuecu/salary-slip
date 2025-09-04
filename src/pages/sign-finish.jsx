@@ -34,7 +34,7 @@ export default function SignFinish() {
 	}, [currentIndex]);
 	return (
 		<Container>
-			<h3>前和完成</h3>
+			<h3>簽署完成</h3>
 			<div
 				style={{
 					width: '80vw',

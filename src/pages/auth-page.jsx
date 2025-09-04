@@ -6,7 +6,7 @@ import SendRequest from '../serviceApi';
 import styled from 'styled-components';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 export default function AuthPage() {
-	const { setDetailPDF, setIsVerified } = useContext(SalaryContext);
+	const { setDetailPDF, setIsVerified, setSignSalaryPDF } = useContext(SalaryContext);
 	const { id } = useParams();
 	const [load, setLoad] = useState(false);
 	const [error, setError] = useState('');
@@ -24,12 +24,32 @@ export default function AuthPage() {
 		try {
 			const response = await SendRequest('POST', send);
 			if (!response.success) throw new Error(response.message);
-			const blob = await fetch(`data:application/pdf;base64,${response.data}`).then((res) =>
-				res.blob()
-			);
-			setDetailPDF(URL.createObjectURL(blob)); // 由後端回傳對應 PDF 預覽連結
-			setIsVerified(true);
-			navigate(`/${id}/comfirm`);
+			console.log('response : ', response);
+			if (response.code && response.code === 'has_sign') {
+				const signPDFList = [];
+				for (const pdf of response.data) {
+					const { name, pdfId } = pdf;
+					const blob = await fetch(`data:application/pdf;base64,${pdfId}`).then((res) =>
+						res.blob()
+					);
+					signPDFList.push({
+						name: name,
+						pdfId: URL.createObjectURL(blob),
+					});
+				}
+
+				setSignSalaryPDF(signPDFList);
+				setIsVerified(true);
+				alert('此單已完成簽署，如果錯誤請與工作人員回報');
+				navigate(`/${id}/signFinish`);
+			} else {
+				const blob = await fetch(`data:application/pdf;base64,${response.data}`).then(
+					(res) => res.blob()
+				);
+				setDetailPDF(URL.createObjectURL(blob)); // 由後端回傳對應 PDF 預覽連結
+				setIsVerified(true);
+				navigate(`/${id}/comfirm`);
+			}
 		} catch (error) {
 			console.error(error);
 			setError(error.message);
