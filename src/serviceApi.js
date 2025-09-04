@@ -1,24 +1,51 @@
-const apiUrl =
-	'https://script.google.com/macros/s/AKfycbwpVg2QHsZAc5ijnW-FrgPnQEEe_CrqKpDc9JfPdeoObN3WHU48YCGtyYN9HGZcO8nx/exec';
+const apiUrl = 'https://salary-clip-proxy-server.zeabur.app/api';
 
-async function SendRequest(method, data) {
-	const query = (data) =>
-		Object.keys(data)
-			.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
-			.join('&');
+function buildQuery(data) {
+	return Object.keys(data)
+		.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+		.join('&');
+}
 
+async function SendRequest(method, data = {}, options = {}) {
 	try {
 		let response;
 
-		if (method === 'POST') {
-			response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(data),
-			});
-		} else if (method === 'GET') {
-			const url = `${apiUrl}?${query(data)}`;
+		if (method === 'GET') {
+			const url = `${apiUrl}?${buildQuery(data)}`;
 			response = await fetch(url, { method: 'GET' });
+		} else if (method === 'POST') {
+			if (options.form === true) {
+				// 使用 FormData 格式
+				const formData = new FormData();
+
+				Object.entries(data).forEach(([key, value]) => {
+					if (Array.isArray(value)) {
+						if (key === 'data') {
+							value.forEach((item) => {
+								formData.append('file', item, item.name || 'upload.pdf'); // ✅ GAS 要吃這個
+							});
+						} else {
+							value.forEach((item, i) => {
+								formData.append(`${key}${i}`, item, item.name || undefined);
+							});
+						}
+					} else {
+						formData.append(key, value);
+					}
+				});
+
+				response = await fetch(apiUrl, {
+					method: 'POST',
+					body: formData, // ❗不能加 Content-Type，瀏覽器會自動處理邊界
+				});
+			} else {
+				// 使用 JSON 格式
+				response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(data),
+				});
+			}
 		} else {
 			console.warn(`Unsupported method: ${method}`);
 			return { success: false, message: '不支援的 API 方法' };

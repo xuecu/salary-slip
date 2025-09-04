@@ -7,10 +7,10 @@ import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
 	<StrictMode>
-		<SalaryProvider>
-			<BrowserRouter>
+		<BrowserRouter>
+			<SalaryProvider>
 				<App />
-			</BrowserRouter>
-		</SalaryProvider>
+			</SalaryProvider>
+		</BrowserRouter>
 	</StrictMode>
 );
